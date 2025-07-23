@@ -1,0 +1,939 @@
+import React, { useState, useContext, createContext, useEffect } from 'react';
+import { useTranslation, initReactI18next } from 'react-i18next';
+import i18n from 'i18next';
+
+// --- ترجمه‌ها ---
+const resources = {
+  fa: {
+    translation: {
+      login: "ورود",
+      logout: "خروج",
+      username: "شماره بارنامه",
+      password: "رمز عبور",
+      enter_container_number: "شماره بارنامه را وارد کنید",
+      enter_password: "رمز عبور را وارد کنید",
+      fill_all_fields: "لطفا همه فیلدها را پر کنید",
+      invalid_username: "شماره بارنامه نامعتبر است",
+      invalid_password: "رمز عبور اشتباه است",
+      dashboard: "داشبورد",
+      shipments: "بارنامه‌ها",
+      bill_of_lading: "بارنامه",
+      tracking: "رهگیری",
+      payments: "پرداخت‌ها",
+      damage_report: "گزارش خرابی",
+      documents: "اسناد",
+      admin: "مدیریت",
+      status: "وضعیت",
+      origin: "مبدا",
+      destination: "مقصد",
+      actions: "عملیات",
+      container_number: "شماره کانتینر",
+      shipper: "صادرکننده",
+      consignee: "گیرنده",
+      origin_port: "بندر مبدا",
+      destination_port: "بندر مقصد",
+      cargo_description: "شرح محموله",
+      weight: "وزن",
+      date: "تاریخ",
+      submit: "ثبت",
+      confirmation: "تاییدیه",
+      no_data: "داده‌ای یافت نشد",
+      view: "مشاهده",
+      select_shipment: "یک بارنامه انتخاب کنید",
+      gps_location: "موقعیت GPS",
+      status_updates: "به‌روزرسانی وضعیت",
+      base_transport_fee: "هزینه پایه حمل",
+      demurrage: "دموراژ",
+      taxes: "مالیات",
+      payment_method: "روش پرداخت",
+      credit_card: "کارت اعتباری",
+      bank_transfer: "انتقال بانکی",
+      cash: "نقدی",
+      pay: "پرداخت",
+      payment_success: "پرداخت با موفقیت انجام شد!",
+      damage_description: "شرح خرابی",
+      upload_photo: "آپلود عکس",
+      pending_review: "در انتظار بررسی",
+      reviewed: "بررسی شده",
+      mark_reviewed: "بررسی شده",
+      upload: "آپلود",
+      users: "کاربران",
+      access_denied: "دسترسی غیرمجاز",
+      admin_only_message: "این بخش فقط برای مدیران قابل مشاهده است.",
+      welcome_message: "خوش آمدید، نقش شما: {{role}}",
+      language: "زبان",
+      role: "نقش",
+      select_role: "نقش خود را انتخاب کنید",
+      damage_reports: "گزارش خرابی‌ها",
+      description: "شرح",
+      select_document: "انتخاب سند",
+      upload_document: "آپلود سند",
+      file_type_pdf_image: "فایل باید PDF یا تصویر باشد",
+      submit_success: "ثبت با موفقیت انجام شد!",
+      submit_failure: "خطا در ثبت، لطفا مجدداً تلاش کنید",
+    }
+  },
+  en: {
+    translation: {
+      login: "Login",
+      logout: "Logout",
+      username: "Container Number",
+      password: "Password",
+      enter_container_number: "Enter container number",
+      enter_password: "Enter password",
+      fill_all_fields: "Please fill all fields",
+      invalid_username: "Invalid container number",
+      invalid_password: "Incorrect password",
+      dashboard: "Dashboard",
+      shipments: "Shipments",
+      bill_of_lading: "Bill of Lading",
+      tracking: "Tracking",
+      payments: "Payments",
+      damage_report: "Damage Report",
+      documents: "Documents",
+      admin: "Admin",
+      status: "Status",
+      origin: "Origin",
+      destination: "Destination",
+      actions: "Actions",
+      container_number: "Container Number",
+      shipper: "Shipper",
+      consignee: "Consignee",
+      origin_port: "Origin Port",
+      destination_port: "Destination Port",
+      cargo_description: "Cargo Description",
+      weight: "Weight",
+      date: "Date",
+      submit: "Submit",
+      confirmation: "Confirmation",
+      no_data: "No data found",
+      view: "View",
+      select_shipment: "Select a shipment",
+      gps_location: "GPS Location",
+      status_updates: "Status Updates",
+      base_transport_fee: "Base Transport Fee",
+      demurrage: "Demurrage",
+      taxes: "Taxes",
+      payment_method: "Payment Method",
+      credit_card: "Credit Card",
+      bank_transfer: "Bank Transfer",
+      cash: "Cash",
+      pay: "Pay",
+      payment_success: "Payment successful!",
+      damage_description: "Damage Description",
+      upload_photo: "Upload Photo",
+      pending_review: "Pending Review",
+      reviewed: "Reviewed",
+      mark_reviewed: "Mark Reviewed",
+      upload: "Upload",
+      users: "Users",
+      access_denied: "Access Denied",
+      admin_only_message: "This section is for admins only.",
+      welcome_message: "Welcome, your role is: {{role}}",
+      language: "Language",
+      role: "Role",
+      select_role: "Select your role",
+      damage_reports: "Damage Reports",
+      description: "Description",
+      select_document: "Select Document",
+      upload_document: "Upload Document",
+      file_type_pdf_image: "File must be PDF or image",
+      submit_success: "Submission successful!",
+      submit_failure: "Submission failed, please try again",
+    }
+  },
+  zh: {
+    translation: {
+      login: "登录",
+      logout: "登出",
+      username: "集装箱号",
+      password: "密码",
+      enter_container_number: "输入集装箱号",
+      enter_password: "输入密码",
+      fill_all_fields: "请填写所有字段",
+      invalid_username: "无效的集装箱号",
+      invalid_password: "密码错误",
+      dashboard: "仪表板",
+      shipments: "货运单",
+      bill_of_lading: "提单",
+      tracking: "追踪",
+      payments: "付款",
+      damage_report: "损坏报告",
+      documents: "文件",
+      admin: "管理",
+      status: "状态",
+      origin: "起点",
+      destination: "目的地",
+      actions: "操作",
+      container_number: "集装箱号",
+      shipper: "发货人",
+      consignee: "收货人",
+      origin_port: "起运港",
+      destination_port: "目的港",
+      cargo_description: "货物描述",
+      weight: "重量",
+      date: "日期",
+      submit: "提交",
+      confirmation: "确认",
+      no_data: "没有找到数据",
+      view: "查看",
+      select_shipment: "选择货运单",
+      gps_location: "GPS位置",
+      status_updates: "状态更新",
+      base_transport_fee: "基础运输费",
+      demurrage: "滞期费",
+      taxes: "税费",
+      payment_method: "支付方式",
+      credit_card: "信用卡",
+      bank_transfer: "银行转账",
+      cash: "现金",
+      pay: "支付",
+      payment_success: "支付成功！",
+      damage_description: "损坏描述",
+      upload_photo: "上传照片",
+      pending_review: "等待审核",
+      reviewed: "已审核",
+      mark_reviewed: "标记为已审核",
+      upload: "上传",
+      users: "用户",
+      access_denied: "拒绝访问",
+      admin_only_message: "此部分仅限管理员查看。",
+      welcome_message: "欢迎，您的角色是：{{role}}",
+      language: "语言",
+      role: "角色",
+      select_role: "选择您的角色",
+      damage_reports: "损坏报告",
+      description: "描述",
+      select_document: "选择文件",
+      upload_document: "上传文件",
+      file_type_pdf_image: "文件必须是PDF或图片",
+      submit_success: "提交成功！",
+      submit_failure: "提交失败，请重试",
+    }
+  },
+  hi: {
+    translation: {
+      login: "लॉगिन",
+      logout: "लॉगआउट",
+      username: "कंटेनर नंबर",
+      password: "पासवर्ड",
+      enter_container_number: "कंटेनर नंबर दर्ज करें",
+      enter_password: "पासवर्ड दर्ज करें",
+      fill_all_fields: "कृपया सभी फ़ील्ड भरें",
+      invalid_username: "अमान्य कंटेनर नंबर",
+      invalid_password: "गलत पासवर्ड",
+      dashboard: "डैशबोर्ड",
+      shipments: "शिपमेंट्स",
+      bill_of_lading: "बिल ऑफ लैडिंग",
+      tracking: "ट्रैकिंग",
+      payments: "भुगतान",
+      damage_report: "डैमेज रिपोर्ट",
+      documents: "दस्तावेज़",
+      admin: "प्रशासन",
+      status: "स्थिति",
+      origin: "मूल",
+      destination: "गंतव्य",
+      actions: "क्रियाएँ",
+      container_number: "कंटेनर नंबर",
+      shipper: "शिपर",
+      consignee: "ग्राही",
+      origin_port: "मूल बंदरगाह",
+      destination_port: "गंतव्य बंदरगाह",
+      cargo_description: "कार्गो विवरण",
+      weight: "वजन",
+      date: "तारीख़",
+      submit: "सबमिट करें",
+      confirmation: "पुष्टि",
+      no_data: "कोई डेटा नहीं मिला",
+      view: "देखें",
+      select_shipment: "शिपमेंट चुनें",
+      gps_location: "जीपीएस स्थान",
+      status_updates: "स्थिति अपडेट",
+      base_transport_fee: "बेस ट्रांसपोर्ट शुल्क",
+      demurrage: "डेमरेज",
+      taxes: "कर",
+      payment_method: "भुगतान का तरीका",
+      credit_card: "क्रेडिट कार्ड",
+      bank_transfer: "बैंक ट्रांसफर",
+      cash: "नकद",
+      pay: "भुगतान करें",
+      payment_success: "भुगतान सफल रहा!",
+      damage_description: "डैमेज विवरण",
+      upload_photo: "फ़ोटो अपलोड करें",
+      pending_review: "समीक्षा लंबित",
+      reviewed: "समीक्षा की गई",
+      mark_reviewed: "समीक्षा चिह्नित करें",
+      upload: "अपलोड करें",
+      users: "उपयोगकर्ता",
+      access_denied: "पहुँच अस्वीकृत",
+      admin_only_message: "यह अनुभाग केवल प्रशासकों के लिए है।",
+      welcome_message: "स्वागत है, आपकी भूमिका है: {{role}}",
+      language: "भाषा",
+      role: "भूमिका",
+      select_role: "अपनी भूमिका चुनें",
+      damage_reports: "डैमेज रिपोर्ट",
+      description: "विवरण",
+      select_document: "दस्तावेज़ चुनें",
+      upload_document: "दस्तावेज़ अपलोड करें",
+      file_type_pdf_image: "फ़ाइल पीडीएफ या छवि होनी चाहिए",
+      submit_success: "सबमिट सफल!",
+      submit_failure: "सबमिट विफल, कृपया पुनः प्रयास करें",
+    }
+  }
+};
+
+// --- راه‌اندازی i18next ---
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'fa',
+  fallbackLng: 'fa',
+  interpolation: { escapeValue: false }
+});
+
+// --- Context ها برای داده‌ها و کاربر ---
+const UserContext = createContext();
+const ShipmentsContext = createContext();
+const DamageReportsContext = createContext();
+const DocumentsContext = createContext();
+const PaymentsContext = createContext();
+
+// --- کد اصلی برنامه ---
+export default function App() {
+  // --- State ها ---
+  const [user, setUser] = useState(null);
+  const [language, setLanguage] = useState('fa');
+  const [shipments, setShipments] = useState([]);
+  const [damageReports, setDamageReports] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [payments, setPayments] = useState([]);
+
+  // --- تغییر زبان ---
+  useEffect(() => {
+    i18n.changeLanguage(language);
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === 'fa' ? 'rtl' : 'ltr';
+  }, [language]);
+
+  // --- ورود خروج ---
+  const login = (username, password) => {
+    // شبیه سازی ورود ساده بر اساس بارنامه و کد (در دنیای واقعی با backend است)
+    // اینجا فرض می کنیم username همان container number و password '1234' برای همه
+    if (!username || !password) return { success: false, message: i18n.t('fill_all_fields') };
+
+    const shipment = shipments.find(s => s.container === username);
+    if (!shipment) return { success: false, message: i18n.t('invalid_username') };
+
+    if (password !== '1234') return { success: false, message: i18n.t('invalid_password') };
+
+    // نقش را از داده (شبیه سازی)
+    // به طور مثال نقش "CargoOwner" برای همه
+    const role = 'CargoOwner'; 
+
+    setUser({ username, role });
+    return { success: true };
+  };
+
+  const logout = () => setUser(null);
+
+  // --- نقش‌ها و دسترسی ---
+  const roleTabs = {
+    Admin: ['dashboard', 'shipments', 'bill_of_lading', 'tracking', 'payments', 'damage_report', 'documents', 'admin'],
+    Driver: ['dashboard', 'shipments', 'tracking', 'damage_report'],
+    Operator: ['dashboard', 'bill_of_lading', 'tracking'],
+    CargoOwner: ['dashboard', 'shipments', 'payments', 'damage_report'],
+    CustomsAgent: ['dashboard', 'shipments', 'documents']
+  };
+
+  // --- تب فعال ---
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  // --- تغییر زبان و نقش به سادگی (برای دمو) ---
+  const { t } = useTranslation();
+
+  if (!user) {
+    return (
+      <LoginPage onLogin={login} t={t} />
+    );
+  }
+
+  const allowedTabs = roleTabs[user.role] || [];
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      <ShipmentsContext.Provider value={{ shipments, setShipments }}>
+        <DamageReportsContext.Provider value={{ damageReports, setDamageReports }}>
+          <DocumentsContext.Provider value={{ documents, setDocuments }}>
+            <PaymentsContext.Provider value={{ payments, setPayments }}>
+              <div className={`min-h-screen flex flex-col ${language === 'fa' ? 'rtl' : 'ltr'}`}>
+                <header className="bg-blue-700 text-white p-4 flex justify-between items-center">
+                  <h1 className="font-bold text-xl">CTMS</h1>
+                  <nav className="flex space-x-4">
+                    {allowedTabs.map(tab => (
+                      <button
+                        key={tab}
+                        className={`px-3 py-1 rounded ${activeTab === tab ? 'bg-blue-900' : ''}`}
+                        onClick={() => setActiveTab(tab)}
+                      >
+                        {t(tab)}
+                      </button>
+                    ))}
+                  </nav>
+                  <div>
+                    <select
+                      value={language}
+                      onChange={e => setLanguage(e.target.value)}
+                      className="text-black rounded p-1"
+                    >
+                      <option value="fa">فارسی</option>
+                      <option value="en">English</option>
+                      <option value="zh">中文</option>
+                      <option value="hi">हिंदी</option>
+                    </select>
+                    <button onClick={logout} className="ml-4 bg-red-600 px-3 py-1 rounded hover:bg-red-700">
+                      {t('logout')}
+                    </button>
+                  </div>
+                </header>
+
+                <main className="flex-grow p-6 bg-gray-100">
+                  <Dashboard t={t} />
+                  {activeTab === 'bill_of_lading' && <BillOfLading t={t} />}
+                  {activeTab === 'shipments' && <Shipments t={t} />}
+                  {activeTab === 'tracking' && <Tracking t={t} />}
+                  {activeTab === 'payments' && <Payments t={t} />}
+                  {activeTab === 'damage_report' && <DamageReport t={t} />}
+                  {activeTab === 'documents' && <Documents t={t} />}
+                  {activeTab === 'admin' && <AdminPanel t={t} />}
+                </main>
+              </div>
+            </PaymentsContext.Provider>
+          </DocumentsContext.Provider>
+        </DamageReportsContext.Provider>
+      </ShipmentsContext.Provider>
+    </UserContext.Provider>
+  );
+}
+
+// --- LoginPage ---
+function LoginPage({ onLogin, t }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState('');
+
+  const submit = e => {
+    e.preventDefault();
+    const res = onLogin(username.trim(), password.trim());
+    if (!res.success) setErr(res.message);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 to-blue-900 text-white p-4">
+      <form onSubmit={submit} className="bg-white text-black p-6 rounded shadow-md w-full max-w-sm">
+        <h2 className="text-2xl mb-4 font-bold">{t('login')}</h2>
+        {err && <p className="text-red-600 mb-2">{err}</p>}
+        <label className="block mb-2">{t('username')}</label>
+        <input
+          type="text"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+          className="border p-2 rounded mb-4 w-full"
+          placeholder={t('enter_container_number')}
+        />
+        <label className="block mb-2">{t('password')}</label>
+        <input
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="border p-2 rounded mb-4 w-full"
+          placeholder={t('enter_password')}
+        />
+        <button type="submit" className="bg-blue-700 text-white py-2 rounded w-full hover:bg-blue-800">{t('login')}</button>
+      </form>
+    </div>
+  );
+}
+
+// --- Dashboard ---
+function Dashboard({ t }) {
+  const { user } = useContext(UserContext);
+
+  return (
+    <div className="max-w-5xl mx-auto bg-white p-6 rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">{t('dashboard')}</h2>
+      <p>{t('welcome_message', { role: user.role })}</p>
+    </div>
+  );
+}
+
+// --- BillOfLading ---
+function BillOfLading({ t }) {
+  const { shipments, setShipments } = useContext(ShipmentsContext);
+  const [form, setForm] = useState({
+    shipper: '', consignee: '', originPort: '', destinationPort: '',
+    container: '', cargoDescription: '', weight: '', date: ''
+  });
+  const [confirmation, setConfirmation] = useState(null);
+
+  const submit = e => {
+    e.preventDefault();
+    // اعتبارسنجی ساده
+    if (Object.values(form).some(f => f === '')) {
+      alert(t('fill_all_fields'));
+      return;
+    }
+
+    setShipments([...shipments, { ...form, status: 'At Port' }]);
+    setConfirmation(form);
+    setForm({
+      shipper: '', consignee: '', originPort: '', destinationPort: '',
+      container: '', cargoDescription: '', weight: '', date: ''
+    });
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto bg-white p-6 rounded shadow space-y-6">
+      <h2 className="text-2xl font-bold">{t('bill_of_lading')}</h2>
+      <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label>{t('shipper')}</label>
+          <input
+            type="text"
+            value={form.shipper}
+            onChange={e => setForm({ ...form, shipper: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('consignee')}</label>
+          <input
+            type="text"
+            value={form.consignee}
+            onChange={e => setForm({ ...form, consignee: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('origin_port')}</label>
+          <input
+            type="text"
+            value={form.originPort}
+            onChange={e => setForm({ ...form, originPort: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('destination_port')}</label>
+          <input
+            type="text"
+            value={form.destinationPort}
+            onChange={e => setForm({ ...form, destinationPort: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('container_number')}</label>
+          <input
+            type="text"
+            value={form.container}
+            onChange={e => setForm({ ...form, container: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('cargo_description')}</label>
+          <input
+            type="text"
+            value={form.cargoDescription}
+            onChange={e => setForm({ ...form, cargoDescription: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('weight')}</label>
+          <input
+            type="number"
+            value={form.weight}
+            onChange={e => setForm({ ...form, weight: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('date')}</label>
+          <input
+            type="date"
+            value={form.date}
+            onChange={e => setForm({ ...form, date: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div className="md:col-span-2">
+          <button type="submit" className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+            {t('submit')}
+          </button>
+        </div>
+      </form>
+
+      {confirmation && (
+        <div className="bg-green-100 border border-green-400 p-4 rounded mt-4">
+          <h3 className="font-bold">{t('confirmation')}</h3>
+          <p>{t('shipper')}: {confirmation.shipper}</p>
+          <p>{t('consignee')}: {confirmation.consignee}</p>
+          <p>{t('container_number')}: {confirmation.container}</p>
+          <p>{t('origin_port')}: {confirmation.originPort}</p>
+          <p>{t('destination_port')}: {confirmation.destinationPort}</p>
+          <p>{t('cargo_description')}: {confirmation.cargoDescription}</p>
+          <p>{t('weight')}: {confirmation.weight}</p>
+          <p>{t('date')}: {confirmation.date}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Shipments ---
+function Shipments({ t }) {
+  const { shipments } = useContext(ShipmentsContext);
+  if (shipments.length === 0) return <p>{t('no_data')}</p>;
+
+  return (
+    <div className="max-w-6xl mx-auto bg-white p-6 rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">{t('shipments')}</h2>
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border border-gray-300 p-2">{t('container_number')}</th>
+            <th className="border border-gray-300 p-2">{t('shipper')}</th>
+            <th className="border border-gray-300 p-2">{t('consignee')}</th>
+            <th className="border border-gray-300 p-2">{t('origin_port')}</th>
+            <th className="border border-gray-300 p-2">{t('destination_port')}</th>
+            <th className="border border-gray-300 p-2">{t('status')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {shipments.map((s, idx) => (
+            <tr key={idx}>
+              <td className="border border-gray-300 p-2">{s.container}</td>
+              <td className="border border-gray-300 p-2">{s.shipper}</td>
+              <td className="border border-gray-300 p-2">{s.consignee}</td>
+              <td className="border border-gray-300 p-2">{s.originPort}</td>
+              <td className="border border-gray-300 p-2">{s.destinationPort}</td>
+              <td className="border border-gray-300 p-2">{s.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// --- Tracking ---
+function Tracking({ t }) {
+  const { shipments } = useContext(ShipmentsContext);
+  const [selectedContainer, setSelectedContainer] = useState('');
+  const [statusUpdates, setStatusUpdates] = useState([]);
+  const [gpsLocation, setGpsLocation] = useState(null);
+
+  const track = () => {
+    if (!selectedContainer) {
+      alert(t('select_shipment'));
+      return;
+    }
+    // داده نمونه (شبیه سازی)
+    const updates = [
+      { date: '2025-07-01', status: 'Loaded on Ship' },
+      { date: '2025-07-10', status: 'In Transit' },
+      { date: '2025-07-15', status: 'Arrived at Destination Port' }
+    ];
+    setStatusUpdates(updates);
+    setGpsLocation({ lat: 35.6892, lng: 51.3890 }); // مثال تهران
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow space-y-4">
+      <h2 className="text-2xl font-bold">{t('tracking')}</h2>
+      <select
+        value={selectedContainer}
+        onChange={e => setSelectedContainer(e.target.value)}
+        className="border p-2 rounded w-full max-w-xs"
+      >
+        <option value="">{t('select_shipment')}</option>
+        {shipments.map(s => (
+          <option key={s.container} value={s.container}>{s.container}</option>
+        ))}
+      </select>
+      <button onClick={track} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">{t('view')}</button>
+
+      {statusUpdates.length > 0 && (
+        <div className="mt-4">
+          <h3>{t('status_updates')}</h3>
+          <ul className="list-disc ml-6">
+            {statusUpdates.map((u, idx) => (
+              <li key={idx}>{u.date}: {u.status}</li>
+            ))}
+          </ul>
+          <p>{t('gps_location')}: {gpsLocation.lat}, {gpsLocation.lng}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Payments ---
+function Payments({ t }) {
+  const { payments, setPayments } = useContext(PaymentsContext);
+  const [form, setForm] = useState({
+    container: '',
+    baseFee: '',
+    demurrage: '',
+    taxes: '',
+    method: 'credit_card'
+  });
+  const [confirmation, setConfirmation] = useState(null);
+
+  const submit = e => {
+    e.preventDefault();
+    if (!form.container || !form.baseFee) {
+      alert(t('fill_all_fields'));
+      return;
+    }
+    setPayments([...payments, form]);
+    setConfirmation(form);
+    setForm({ container: '', baseFee: '', demurrage: '', taxes: '', method: 'credit_card' });
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow space-y-6">
+      <h2 className="text-2xl font-bold">{t('payments')}</h2>
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label>{t('container_number')}</label>
+          <input
+            type="text"
+            value={form.container}
+            onChange={e => setForm({ ...form, container: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('base_transport_fee')}</label>
+          <input
+            type="number"
+            value={form.baseFee}
+            onChange={e => setForm({ ...form, baseFee: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('demurrage')}</label>
+          <input
+            type="number"
+            value={form.demurrage}
+            onChange={e => setForm({ ...form, demurrage: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('taxes')}</label>
+          <input
+            type="number"
+            value={form.taxes}
+            onChange={e => setForm({ ...form, taxes: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('payment_method')}</label>
+          <select
+            value={form.method}
+            onChange={e => setForm({ ...form, method: e.target.value })}
+            className="border p-2 rounded w-full"
+          >
+            <option value="credit_card">{t('credit_card')}</option>
+            <option value="bank_transfer">{t('bank_transfer')}</option>
+            <option value="cash">{t('cash')}</option>
+          </select>
+        </div>
+        <button type="submit" className="bg-green-700 text-white py-2 px-4 rounded hover:bg-green-800">{t('pay')}</button>
+      </form>
+
+      {confirmation && (
+        <div className="bg-green-100 border border-green-400 p-4 rounded mt-4">
+          <h3>{t('payment_success')}</h3>
+          <p>{t('container_number')}: {confirmation.container}</p>
+          <p>{t('base_transport_fee')}: {confirmation.baseFee}</p>
+          <p>{t('demurrage')}: {confirmation.demurrage}</p>
+          <p>{t('taxes')}: {confirmation.taxes}</p>
+          <p>{t('payment_method')}: {t(confirmation.method)}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- DamageReport ---
+function DamageReport({ t }) {
+  const { damageReports, setDamageReports } = useContext(DamageReportsContext);
+  const [form, setForm] = useState({ container: '', damageDescription: '', photo: null });
+  const [confirmation, setConfirmation] = useState(null);
+
+  const submit = e => {
+    e.preventDefault();
+    if (!form.container || !form.damageDescription) {
+      alert(t('fill_all_fields'));
+      return;
+    }
+    setDamageReports([...damageReports, { ...form, status: 'pending_review' }]);
+    setConfirmation(form);
+    setForm({ container: '', damageDescription: '', photo: null });
+  };
+
+  const onPhotoChange = e => {
+    const file = e.target.files[0];
+    if (file) setForm({ ...form, photo: file });
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow space-y-6">
+      <h2 className="text-2xl font-bold">{t('damage_reports')}</h2>
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label>{t('container_number')}</label>
+          <input
+            type="text"
+            value={form.container}
+            onChange={e => setForm({ ...form, container: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('damage_description')}</label>
+          <textarea
+            value={form.damageDescription}
+            onChange={e => setForm({ ...form, damageDescription: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('upload_photo')}</label>
+          <input type="file" accept="image/*" onChange={onPhotoChange} className="border p-2 rounded w-full" />
+        </div>
+        <button type="submit" className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">{t('submit')}</button>
+      </form>
+
+      {confirmation && (
+        <div className="bg-green-100 border border-green-400 p-4 rounded mt-4">
+          <h3>{t('confirmation')}</h3>
+          <p>{t('container_number')}: {confirmation.container}</p>
+          <p>{t('damage_description')}: {confirmation.damageDescription}</p>
+          {confirmation.photo && <p>{confirmation.photo.name}</p>}
+          <p>{t('pending_review')}</p>
+        </div>
+      )}
+
+      {damageReports.length > 0 && (
+        <div className="mt-6">
+          <h3>{t('damage_reports')}</h3>
+          <ul>
+            {damageReports.map((d, idx) => (
+              <li key={idx}>
+                {d.container}: {d.damageDescription} - {d.status === 'pending_review' ? t('pending_review') : t('reviewed')}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Documents ---
+function Documents({ t }) {
+  const { documents, setDocuments } = useContext(DocumentsContext);
+  const [form, setForm] = useState({ container: '', file: null });
+  const [confirmation, setConfirmation] = useState(null);
+
+  const submit = e => {
+    e.preventDefault();
+    if (!form.container || !form.file) {
+      alert(t('fill_all_fields'));
+      return;
+    }
+    // قبول فقط PDF یا تصویر
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(form.file.type)) {
+      alert(t('file_type_pdf_image'));
+      return;
+    }
+    setDocuments([...documents, form]);
+    setConfirmation(form);
+    setForm({ container: '', file: null });
+  };
+
+  const onFileChange = e => {
+    const file = e.target.files[0];
+    if (file) setForm({ ...form, file });
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow space-y-6">
+      <h2 className="text-2xl font-bold">{t('documents')}</h2>
+      <form onSubmit={submit} className="space-y-4">
+        <div>
+          <label>{t('container_number')}</label>
+          <input
+            type="text"
+            value={form.container}
+            onChange={e => setForm({ ...form, container: e.target.value })}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div>
+          <label>{t('upload_document')}</label>
+          <input type="file" accept=".pdf,image/*" onChange={onFileChange} className="border p-2 rounded w-full" />
+        </div>
+        <button type="submit" className="bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800">{t('upload')}</button>
+      </form>
+
+      {confirmation && (
+        <div className="bg-green-100 border border-green-400 p-4 rounded mt-4">
+          <h3>{t('confirmation')}</h3>
+          <p>{t('container_number')}: {confirmation.container}</p>
+          <p>{confirmation.file.name}</p>
+        </div>
+      )}
+
+      {documents.length > 0 && (
+        <div className="mt-6">
+          <h3>{t('documents')}</h3>
+          <ul>
+            {documents.map((doc, idx) => (
+              <li key={idx}>
+                {doc.container}: {doc.file.name}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- AdminPanel ---
+function AdminPanel({ t }) {
+  const { user } = useContext(UserContext);
+  if (user.role !== 'Admin') {
+    return (
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow text-red-600">
+        <p>{t('access_denied')}</p>
+        <p>{t('admin_only_message')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+      <h2 className="text-2xl font-bold">{t('admin')}</h2>
+      <p>Admin panel content goes here.</p>
+    </div>
+  );
+}
